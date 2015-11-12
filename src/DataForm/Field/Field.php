@@ -84,6 +84,8 @@ abstract class Field extends Widget
     public $star = '';
     public $req = '';
 
+    public $children = [];
+
     public function __construct($name, $label, &$model = null, &$model_relations = null)
     {
         parent::__construct();
@@ -614,10 +616,38 @@ abstract class Field extends Widget
     {
         return $this->parseString($view, true);
     }
-    
+
+    /**
+     * Add a child field
+     *
+     * @param $child
+     * @param $value
+     * @param $operator
+     */
+    public function addChild($child, $value, $operator)
+    {
+        array_push($this->children, [
+            'child' => $child,
+            'value' => $value,
+            'operator' => $operator,
+        ]);
+    }
+
+    /**
+     * Returns the array fragment belonging to array-based fields.
+     *
+     * @return string
+     */
+    public function arrayFragment()
+    {
+        return '';
+    }
 
     public function build()
     {
+        foreach ($this->children as $child) {
+            $child['child']->build();
+        }
         if($this->label == '') {
             $this->has_wrapper = false;
         }
