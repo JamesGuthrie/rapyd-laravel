@@ -92,6 +92,7 @@ class DataForm extends Widget
     protected $form_callable = '';
     protected $parents = array();
     protected $conditions = array();
+    protected $status_set = false;
 
     public function __construct()
     {
@@ -344,12 +345,24 @@ class DataForm extends Widget
         return ($this->process_status == $process_status);
     }
 
+    public function setStatus($status)
+    {
+        $this->status = $status;
+        $this->status_set = true;
+    }
+
     protected function sniffStatus()
     {
-        if (isset($this->model)) {
-            $this->status = ($this->model->exists) ? "modify" : "create";
-        } else {
-            $this->status = "create";
+        if (!$this->status_set) {
+            if (isset($this->model)) {
+                if ($this->model->exists) {
+                    $this->setStatus("modify");
+                } else {
+                    $this->setStatus("create");
+                }
+            } else {
+                $this->setStatus("create");
+            }
         }
     }
 
