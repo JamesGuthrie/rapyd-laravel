@@ -374,6 +374,24 @@ class DataForm extends Widget
 
     }
 
+    private function isFulfilled($left, $right, $operator)
+    {
+        switch ($operator) {
+            case '==':
+                return $left == $right;
+            case '!=':
+                return $left != $right;
+            case '<=':
+                return $left <= $right;
+            case '<':
+                return $left < $right;
+            case '>=':
+                return $left >= $right;
+            case '>':
+                return $left > $right;
+        }
+    }
+
     /**
      * Reorder fields so that dependencies are moved to children of the parent.
      */
@@ -385,9 +403,17 @@ class DataForm extends Widget
                 if (!in_array($childName, $this->parents)) {
                     $value = $this->conditions[$childName]['value'];
                     $operator = $this->conditions[$childName]['operator'];
-                    $this->field($parentName)->addChild($this->field($childName), $value, $operator);
-                    // Once the child has been put under its parent, the form doesn't need to care about it.
-                    unset($this->fields[$childName]);
+                    if ($this->status == "show") {
+                        // When showing, we can just leave off children which are not fulfilled
+                        $left = $this->fields[$parentName]->value;
+                        if (!$this->isFulfilled($left, $value, $operator)){
+                            unset($this->fields[$childName]);
+                        }
+                    } else {
+                        $this->field($parentName)->addChild($this->field($childName), $value, $operator);
+                        // Once the child has been put under its parent, the form doesn't need to care about it.
+                        unset($this->fields[$childName]);
+                    }
                     unset($this->parents[$childName]);
                 }
             }
